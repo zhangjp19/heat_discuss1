@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from CoolProp.CoolProp import PropsSI
 import h5py
+import sys
 
 def calc_time(P_CRIT, P_A_INIT, P_B_INIT, P_B_FIN, T_A_INIT, T_B_INIT, V_A, V_B, q2, t_step):
     s_B2 = PropsSI("S", "P", P_B_INIT, "T", T_B_INIT, "REFPROP::CO2")
@@ -62,9 +63,6 @@ def calc_time(P_CRIT, P_A_INIT, P_B_INIT, P_B_FIN, T_A_INIT, T_B_INIT, V_A, V_B,
     print("total t:", t_part1 + t_part2)
     print("V_B1:", V_B1)
 
-    t_part3 = 0
-    P_A = P_CRIT * 1
-
     data = {}
     data["t"] = t_list
     data["P_A"] = P_A_list
@@ -83,10 +81,13 @@ V_A = 0.032
 V_B = 0.015
 q2 = 0.1
 
-P_CRIT = 7500000
+P_CRIT = float(sys.argv[1]) * 1000000
 t_step = 0.1
 
+filename = sys.argv[2]
+
 data = calc_time(P_CRIT, P_A_INIT, P_B_INIT, P_B_FIN, T_A_INIT, T_B_INIT, V_A, V_B, q2, t_step)
+print("final T_A:", data["T_A"][-1])
 
 fig, ax = plt.subplots(2,1)
 
@@ -105,9 +106,9 @@ ax[1].grid(True)
 fig.tight_layout()
 plt.show()
 
-fig.savefig("fig1.png", format="png")
+fig.savefig(filename + ".png", format="png")
 
-with h5py.File("data.h5", "w") as out_file:
+with h5py.File(filename + ".h5", "w") as out_file:
     out_file["t"] = data["t"]
     out_file["P_A"] = data["P_A"]
     out_file["P_B2"] = data["P_B2"]
